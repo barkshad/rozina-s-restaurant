@@ -4,6 +4,7 @@ import { useCart } from '@/context/CartContext';
 import { Plus, Check } from 'lucide-react';
 import { clsx } from 'clsx';
 import toast from 'react-hot-toast';
+import { motion } from 'motion/react';
 
 interface MenuItemCardProps {
   item: MenuItem;
@@ -21,13 +22,20 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({ item }) => {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all overflow-hidden border border-stone-100 flex flex-col h-full group">
-      <div className="relative h-48 overflow-hidden bg-stone-200">
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      whileHover={{ y: -5 }}
+      transition={{ duration: 0.3 }}
+      className="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-stone-100 flex flex-col h-full group"
+    >
+      <div className="relative h-56 overflow-hidden bg-stone-200">
         {item.imageUrl ? (
           <img
             src={item.imageUrl}
             alt={item.name}
-            className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
+            className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
             loading="lazy"
             decoding="async"
             width="400"
@@ -38,32 +46,37 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({ item }) => {
             <span className="text-sm font-medium">No Image</span>
           </div>
         )}
-        <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-md text-xs font-bold text-rozina-maroon shadow-sm uppercase tracking-wide">
+        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+        <div className="absolute top-3 right-3 bg-white/95 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-rozina-maroon shadow-sm uppercase tracking-wider border border-stone-100">
           {item.category}
         </div>
       </div>
-      <div className="p-5 flex flex-col flex-grow">
-        <div className="flex justify-between items-start mb-2">
-          <h3 className="text-lg font-bold text-stone-900 line-clamp-1">{item.name}</h3>
-          <span className="text-rozina-maroon font-bold whitespace-nowrap ml-2">
+      <div className="p-6 flex flex-col flex-grow">
+        <div className="flex justify-between items-start mb-3">
+          <h3 className="text-xl font-serif font-bold text-stone-900 line-clamp-1 group-hover:text-rozina-maroon transition-colors">{item.name}</h3>
+          <span className="text-rozina-maroon font-bold whitespace-nowrap ml-3 bg-rozina-maroon/5 px-2 py-1 rounded-lg">
             KES {item.price.toLocaleString()}
           </span>
         </div>
-        <p className="text-stone-500 text-sm mb-4 line-clamp-2 flex-grow">{item.description}</p>
+        <p className="text-stone-500 text-sm mb-6 line-clamp-2 flex-grow leading-relaxed">{item.description}</p>
         <button
           onClick={handleAddToCart}
           disabled={added}
           className={clsx(
-            'w-full py-2 px-4 rounded-lg font-medium transition-all flex items-center justify-center gap-2',
+            'w-full py-3 px-4 rounded-xl font-medium transition-all flex items-center justify-center gap-2 shadow-sm',
             added
               ? 'bg-green-600 text-white cursor-default'
-              : 'bg-rozina-maroon text-white hover:bg-rozina-maroon/90 active:scale-95'
+              : 'bg-stone-900 text-white hover:bg-rozina-maroon hover:shadow-md active:scale-95'
           )}
         >
           {added ? (
-            <>
+            <motion.div 
+              initial={{ scale: 0.5 }} 
+              animate={{ scale: 1 }}
+              className="flex items-center gap-2"
+            >
               <Check className="h-4 w-4" /> Added
-            </>
+            </motion.div>
           ) : (
             <>
               <Plus className="h-4 w-4" /> Add to Cart
@@ -71,7 +84,7 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({ item }) => {
           )}
         </button>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

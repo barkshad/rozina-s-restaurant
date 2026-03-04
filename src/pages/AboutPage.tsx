@@ -8,7 +8,7 @@ const AboutPage = () => {
       {/* Hero Section */}
       <section className="relative py-20 md:py-32 px-6 overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-full opacity-5 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
-        <div className="max-w-7xl mx-auto relative z-10">
+        <div className="max-w-screen-2xl mx-auto relative z-10">
           <div className="flex flex-col md:flex-row items-center gap-16">
             <div className="md:w-1/2">
               <motion.span 
@@ -64,7 +64,7 @@ const AboutPage = () => {
 
       {/* Values Section */}
       <section className="py-24 bg-white relative">
-        <div className="max-w-7xl mx-auto px-6">
+        <div className="max-w-screen-2xl mx-auto px-6">
           <div className="grid md:grid-cols-3 gap-12">
             {[
               { icon: Award, title: "Excellence", desc: "We never compromise on quality. From sourcing to plating, every step is handled with care." },

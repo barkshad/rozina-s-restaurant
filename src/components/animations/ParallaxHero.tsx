@@ -42,7 +42,7 @@ const ParallaxHero = () => {
       .fromTo(text.children, { y: 50, opacity: 0 }, { y: 0, opacity: 1, duration: 1, stagger: 0.2, ease: "power3.out" }, "-=1");
 
     // Scroll parallax
-    gsap.to(bg, {
+    const bgTween = gsap.to(bg, {
       yPercent: 30,
       scale: 1.1,
       ease: "none",
@@ -54,7 +54,7 @@ const ParallaxHero = () => {
       }
     });
 
-    gsap.to(text, {
+    const textTween = gsap.to(text, {
       yPercent: -50,
       opacity: 0,
       ease: "none",
@@ -67,7 +67,8 @@ const ParallaxHero = () => {
     });
 
     return () => {
-      ScrollTrigger.getAll().forEach(t => t.kill());
+      bgTween.kill();
+      textTween.kill();
     };
   }, []);
 

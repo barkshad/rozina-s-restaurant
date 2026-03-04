@@ -81,7 +81,7 @@ const CheckoutPage = () => {
 
   return (
     <div className="min-h-screen bg-rozina-cream py-24 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-screen-xl mx-auto">
         <h1 className="text-4xl md:text-5xl font-serif font-medium text-rozina-maroon mb-12 text-center">
           Your Order
         </h1>

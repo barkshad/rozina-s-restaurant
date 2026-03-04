@@ -13,7 +13,7 @@ const HomePage = () => {
       <ParallaxHero />
 
       {/* Featured Section - Overlapping Grid */}
-      <section className="py-24 px-4 md:px-16 max-w-7xl mx-auto">
+      <section className="py-24 px-4 md:px-16 max-w-screen-2xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           <div className="lg:col-span-5 relative z-10">
             <FadeInUp>

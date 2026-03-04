@@ -138,6 +138,14 @@ const AdminPage = () => {
     }
   };
 
+  const handleHeroVideoUploadSuccess = React.useCallback((url: string) => {
+    setHeroVideoUrl(url);
+  }, []);
+
+  const handleMenuItemImageUploadSuccess = React.useCallback((url: string) => {
+    setNewItem((prev) => ({ ...prev, imageUrl: url }));
+  }, []);
+
   // Customer Data Extraction
   const uniqueCustomers = React.useMemo(() => {
     const customerMap = new Map();
@@ -288,7 +296,7 @@ const AdminPage = () => {
 
   return (
     <div className="min-h-screen bg-stone-50 pt-24 pb-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
         <h1 className="text-3xl font-serif font-bold text-rozina-maroon mb-8">Admin Dashboard</h1>
 
         {/* Tabs */}
@@ -535,7 +543,7 @@ const AdminPage = () => {
                     className="shadow-sm focus:ring-rozina-gold focus:border-rozina-gold block w-full sm:text-sm border-stone-300 rounded-md p-2 border"
                   />
                   <CloudinaryUploadWidget
-                    onUploadSuccess={(url) => setHeroVideoUrl(url)}
+                    onUploadSuccess={handleHeroVideoUploadSuccess}
                     resourceType="video"
                     clientAllowedFormats={['mp4', 'webm', 'mov']}
                     buttonText="Upload Video"
@@ -671,7 +679,7 @@ const AdminPage = () => {
                     />
                   )}
                   <CloudinaryUploadWidget
-                    onUploadSuccess={(url) => setNewItem({ ...newItem, imageUrl: url })}
+                    onUploadSuccess={handleMenuItemImageUploadSuccess}
                   />
                 </div>
               </div>

@@ -30,7 +30,7 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
 
     if (!section || !bg) return;
 
-    gsap.to(bg, {
+    const tween = gsap.to(bg, {
       yPercent: 50 * speed, // Move background vertically
       ease: "none",
       scrollTrigger: {
@@ -42,7 +42,7 @@ const ParallaxSection: React.FC<ParallaxSectionProps> = ({
     });
 
     return () => {
-      ScrollTrigger.getAll().forEach(t => t.kill());
+      tween.kill();
     };
   }, [speed]);
 

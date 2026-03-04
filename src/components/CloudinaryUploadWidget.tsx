@@ -29,7 +29,11 @@ const CloudinaryUploadWidget: React.FC<CloudinaryUploadWidgetProps> = ({
           folder: 'rozina_menu',
           resourceType: resourceType,
           clientAllowedFormats: clientAllowedFormats,
-          maxFileSize: resourceType === 'video' ? 50000000 : 5000000, // 50MB for video, 5MB for image
+          maxFileSize: resourceType === 'video' ? 100000000 : 10000000, // 100MB for video, 10MB for image
+          maxChunkSize: 6000000, // 6MB chunks for reliability
+          showAdvancedOptions: true,
+          cropping: resourceType === 'image', // Enable cropping for images
+          showCompletedButton: true,
         },
         (error: any, result: any) => {
           if (!error && result && result.event === 'success') {

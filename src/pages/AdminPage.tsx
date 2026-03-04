@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy, where } from 'firebase/firestore';
+import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy, where, setDoc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Order, MenuItem } from '@/types';
 import CloudinaryUploadWidget from '@/components/CloudinaryUploadWidget';
-import { LayoutDashboard, ShoppingBag, Utensils, CheckCircle, Loader2, Plus, Trash2, Users, Download } from 'lucide-react';
+import { LayoutDashboard, ShoppingBag, Utensils, CheckCircle, Loader2, Plus, Trash2, Users, Download, Settings, Video } from 'lucide-react';
 import { clsx } from 'clsx';
 import toast from 'react-hot-toast';
 import jsPDF from 'jspdf';
@@ -12,10 +12,14 @@ import autoTable from 'jspdf-autotable';
 const CATEGORIES = ['Poussin Specials', 'BBQ/Tikka', 'Chinese', 'Italian', 'Seafood'];
 
 const AdminPage = () => {
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'orders' | 'menu' | 'customers'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'orders' | 'menu' | 'customers' | 'settings'>('dashboard');
   const [orders, setOrders] = useState<Order[]>([]);
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  // Settings State
+  const [heroVideoUrl, setHeroVideoUrl] = useState('');
+  const [isSavingSettings, setIsSavingSettings] = useState(false);
   
   // Menu Form State
   const [newItem, setNewItem] = useState<Partial<MenuItem>>({
@@ -52,11 +56,33 @@ const AdminPage = () => {
       });
       setMenuItems(fetchedMenu);
 
+      // Fetch Settings
+      const settingsRef = doc(db, 'settings', 'site_config');
+      const settingsSnap = await getDoc(settingsRef);
+      if (settingsSnap.exists()) {
+        setHeroVideoUrl(settingsSnap.data().heroVideoUrl || '');
+      }
+
     } catch (error) {
       console.error('Error fetching data:', error);
       toast.error('Failed to load admin data');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSaveSettings = async () => {
+    setIsSavingSettings(true);
+    try {
+      await setDoc(doc(db, 'settings', 'site_config'), {
+        heroVideoUrl
+      }, { merge: true });
+      toast.success('Settings saved successfully');
+    } catch (error) {
+      console.error('Error saving settings:', error);
+      toast.error('Failed to save settings');
+    } finally {
+      setIsSavingSettings(false);
     }
   };
 
@@ -315,6 +341,18 @@ const AdminPage = () => {
           <Users className="inline-block w-4 h-4 mr-2" />
           Customers
         </button>
+        <button
+          onClick={() => setActiveTab('settings')}
+          className={clsx(
+            'pb-4 px-4 text-sm font-medium transition-colors whitespace-nowrap',
+            activeTab === 'settings'
+              ? 'border-b-2 border-rozina-maroon text-rozina-maroon'
+              : 'text-stone-500 hover:text-stone-700'
+          )}
+        >
+          <Settings className="inline-block w-4 h-4 mr-2" />
+          Site Settings
+        </button>
       </div>
 
       {/* Dashboard Content */}
@@ -463,6 +501,74 @@ const AdminPage = () => {
                 )}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+
+      {/* Settings Content */}
+      {activeTab === 'settings' && (
+        <div className="bg-white shadow sm:rounded-lg overflow-hidden">
+          <div className="px-4 py-5 sm:px-6 bg-stone-50 border-b border-stone-200">
+            <h3 className="text-lg leading-6 font-medium text-stone-900">Site Configuration</h3>
+            <p className="mt-1 max-w-2xl text-sm text-stone-500">
+              Manage global website settings.
+            </p>
+          </div>
+          <div className="p-6 space-y-8">
+            <div>
+              <h4 className="text-md font-medium text-stone-900 mb-4 flex items-center">
+                <Video className="w-5 h-5 mr-2 text-rozina-maroon" />
+                Hero Section Video
+              </h4>
+              <p className="text-sm text-stone-500 mb-4">
+                Upload a video to play in the background of the hero section. This will replace the default image.
+                For best results, use a compressed MP4 file (under 50MB).
+              </p>
+              
+              <div className="flex flex-col space-y-4 max-w-xl">
+                <div className="flex items-center space-x-4">
+                  <input
+                    type="text"
+                    value={heroVideoUrl}
+                    onChange={(e) => setHeroVideoUrl(e.target.value)}
+                    placeholder="https://..."
+                    className="shadow-sm focus:ring-rozina-gold focus:border-rozina-gold block w-full sm:text-sm border-stone-300 rounded-md p-2 border"
+                  />
+                  <CloudinaryUploadWidget
+                    onUploadSuccess={(url) => setHeroVideoUrl(url)}
+                    resourceType="video"
+                    clientAllowedFormats={['mp4', 'webm', 'mov']}
+                    buttonText="Upload Video"
+                  />
+                </div>
+                
+                {heroVideoUrl && (
+                  <div className="mt-4 rounded-lg overflow-hidden border border-stone-200 bg-black aspect-video">
+                    <video 
+                      src={heroVideoUrl} 
+                      controls 
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                )}
+
+                <div className="pt-4">
+                  <button
+                    onClick={handleSaveSettings}
+                    disabled={isSavingSettings}
+                    className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-rozina-maroon hover:bg-rozina-maroon/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rozina-gold disabled:opacity-50 transition-all"
+                  >
+                    {isSavingSettings ? (
+                      <>
+                        <Loader2 className="animate-spin -ml-1 mr-2 h-5 w-5" /> Saving...
+                      </>
+                    ) : (
+                      'Save Settings'
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}

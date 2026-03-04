@@ -1,8 +1,10 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ChevronDown } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -10,6 +12,22 @@ const ParallaxHero = () => {
   const heroRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLDivElement>(null);
   const bgRef = useRef<HTMLDivElement>(null);
+  const [heroVideoUrl, setHeroVideoUrl] = useState<string>('');
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const settingsRef = doc(db, 'settings', 'site_config');
+        const settingsSnap = await getDoc(settingsRef);
+        if (settingsSnap.exists() && settingsSnap.data().heroVideoUrl) {
+          setHeroVideoUrl(settingsSnap.data().heroVideoUrl);
+        }
+      } catch (error) {
+        console.error("Error fetching hero settings:", error);
+      }
+    };
+    fetchSettings();
+  }, []);
 
   useEffect(() => {
     const hero = heroRef.current;
@@ -55,14 +73,30 @@ const ParallaxHero = () => {
 
   return (
     <div ref={heroRef} className="relative h-screen w-full overflow-hidden flex items-center justify-center">
-      {/* Background Image */}
+      {/* Background Media */}
       <div 
         ref={bgRef}
-        className="absolute inset-0 w-full h-full bg-cover bg-center z-0"
-        style={{ 
-          backgroundImage: 'url("https://images.unsplash.com/photo-1514933651103-005eec06c04b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1934&q=80")',
-        }}
+        className="absolute inset-0 w-full h-full z-0"
       >
+        {heroVideoUrl ? (
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="absolute inset-0 w-full h-full object-cover"
+            key={heroVideoUrl} // Force re-render when URL changes
+          >
+            <source src={heroVideoUrl} type="video/mp4" />
+          </video>
+        ) : (
+          <div 
+            className="absolute inset-0 w-full h-full bg-cover bg-center"
+            style={{ 
+              backgroundImage: 'url("https://images.unsplash.com/photo-1514933651103-005eec06c04b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1934&q=80")',
+            }}
+          />
+        )}
         <div className="absolute inset-0 bg-black/40" />
       </div>
 

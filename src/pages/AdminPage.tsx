@@ -37,8 +37,9 @@ const AdminPage = () => {
 
   const fetchData = async () => {
     setLoading(true);
+    
+    // Fetch Orders
     try {
-      // Fetch Orders
       const ordersQuery = query(collection(db, 'orders'), orderBy('timestamp', 'desc'));
       const ordersSnapshot = await getDocs(ordersQuery);
       const fetchedOrders: Order[] = [];
@@ -46,8 +47,13 @@ const AdminPage = () => {
         fetchedOrders.push({ id: doc.id, ...doc.data() } as Order);
       });
       setOrders(fetchedOrders);
+    } catch (error) {
+      console.error('Error fetching orders:', error);
+      toast.error('Failed to load orders. Check permissions.');
+    }
 
-      // Fetch Menu Items
+    // Fetch Menu Items
+    try {
       const menuQuery = query(collection(db, 'menu'), orderBy('name'));
       const menuSnapshot = await getDocs(menuQuery);
       const fetchedMenu: MenuItem[] = [];
@@ -55,20 +61,24 @@ const AdminPage = () => {
         fetchedMenu.push({ id: doc.id, ...doc.data() } as MenuItem);
       });
       setMenuItems(fetchedMenu);
+    } catch (error) {
+      console.error('Error fetching menu:', error);
+      toast.error('Failed to load menu items.');
+    }
 
-      // Fetch Settings
+    // Fetch Settings
+    try {
       const settingsRef = doc(db, 'settings', 'site_config');
       const settingsSnap = await getDoc(settingsRef);
       if (settingsSnap.exists()) {
         setHeroVideoUrl(settingsSnap.data().heroVideoUrl || '');
       }
-
     } catch (error) {
-      console.error('Error fetching data:', error);
-      toast.error('Failed to load admin data');
-    } finally {
-      setLoading(false);
+      console.error('Error fetching settings:', error);
+      // Settings are optional, so maybe just log it
     }
+
+    setLoading(false);
   };
 
   const handleSaveSettings = async () => {

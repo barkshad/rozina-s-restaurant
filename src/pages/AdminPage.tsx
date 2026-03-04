@@ -359,7 +359,17 @@ const AdminPage = () => {
   return (
     <div className="min-h-screen bg-stone-50 pt-24 pb-12">
       <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="text-3xl font-serif font-bold text-rozina-maroon mb-8">Admin Dashboard</h1>
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl font-serif font-bold text-rozina-maroon">Admin Dashboard</h1>
+          <button
+            onClick={fetchData}
+            disabled={loading}
+            className="inline-flex items-center px-4 py-2 border border-stone-300 shadow-sm text-sm font-medium rounded-md text-stone-700 bg-white hover:bg-stone-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rozina-gold transition-all"
+          >
+            <Loader2 className={clsx("mr-2 h-4 w-4", loading && "animate-spin")} />
+            Refresh Data
+          </button>
+        </div>
 
         {/* Tabs */}
       <div className="flex space-x-4 border-b border-stone-200 mb-8 overflow-x-auto">

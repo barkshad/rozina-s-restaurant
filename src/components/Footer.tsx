@@ -72,8 +72,19 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center text-xs font-light tracking-wide">
+        <div className="border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center text-xs font-light tracking-wide relative">
           <p>&copy; {new Date().getFullYear()} Rozina's Restaurant. All rights reserved.</p>
+          
+          <button 
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            className="absolute -top-6 left-1/2 transform -translate-x-1/2 bg-rozina-gold text-rozina-maroon p-3 rounded-full shadow-lg hover:bg-white transition-colors duration-300 group"
+            aria-label="Back to Top"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="group-hover:-translate-y-1 transition-transform">
+              <path d="m18 15-6-6-6 6"/>
+            </svg>
+          </button>
+
           <div className="flex space-x-6 mt-4 md:mt-0">
             <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
             <a href="#" className="hover:text-white transition-colors">Terms of Service</a>

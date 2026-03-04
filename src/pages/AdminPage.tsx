@@ -22,6 +22,7 @@ const AdminPage = () => {
   const [isSavingSettings, setIsSavingSettings] = useState(false);
   
   // Menu Form State
+  const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
   const [newItem, setNewItem] = useState<Partial<MenuItem>>({
     name: '',
     price: 0,
@@ -30,6 +31,30 @@ const AdminPage = () => {
     imageUrl: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleEditMenuItem = (item: MenuItem) => {
+    setEditingItem(item);
+    setNewItem({
+      name: item.name,
+      price: item.price,
+      category: item.category,
+      description: item.description,
+      imageUrl: item.imageUrl,
+    });
+    setActiveTab('menu');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingItem(null);
+    setNewItem({
+      name: '',
+      price: 0,
+      category: CATEGORIES[0],
+      description: '',
+      imageUrl: '',
+    });
+  };
 
   useEffect(() => {
     fetchData();
@@ -134,7 +159,7 @@ const AdminPage = () => {
     }
   };
 
-  const handleAddMenuItem = async (e: React.FormEvent) => {
+  const handleAddOrUpdateMenuItem = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newItem.name || !newItem.price || !newItem.description) {
       toast.error('Please fill in all required fields');
@@ -143,8 +168,23 @@ const AdminPage = () => {
 
     setIsSubmitting(true);
     try {
-      await addDoc(collection(db, 'menu'), newItem);
-      toast.success('Menu item added successfully');
+      if (editingItem) {
+        // Update existing item
+        const itemRef = doc(db, 'menu', editingItem.id);
+        await updateDoc(itemRef, newItem);
+        setMenuItems((prev) =>
+          prev.map((item) => (item.id === editingItem.id ? { ...item, ...newItem } : item))
+        );
+        toast.success('Menu item updated successfully');
+      } else {
+        // Add new item
+        const docRef = await addDoc(collection(db, 'menu'), newItem);
+        setMenuItems((prev) => [...prev, { id: docRef.id, ...newItem } as MenuItem]);
+        toast.success('Menu item added successfully');
+      }
+      
+      // Reset form
+      setEditingItem(null);
       setNewItem({
         name: '',
         price: 0,
@@ -153,8 +193,8 @@ const AdminPage = () => {
         imageUrl: '',
       });
     } catch (error) {
-      console.error('Error adding menu item:', error);
-      toast.error('Failed to add menu item');
+      console.error('Error saving menu item:', error);
+      toast.error('Failed to save menu item');
     } finally {
       setIsSubmitting(false);
     }
@@ -387,17 +427,68 @@ const AdminPage = () => {
 
       {/* Dashboard Content */}
       {activeTab === 'dashboard' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="px-4 py-5 sm:p-6">
-              <dt className="text-sm font-medium text-stone-500 truncate">Total Orders</dt>
-              <dd className="mt-1 text-3xl font-semibold text-stone-900">{totalOrders}</dd>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="bg-white overflow-hidden shadow-sm rounded-xl border border-stone-100 hover:shadow-md transition-shadow">
+            <div className="p-6">
+              <div className="flex items-center">
+                <div className="flex-shrink-0 bg-green-100 rounded-md p-3">
+                  <ShoppingBag className="h-6 w-6 text-green-600" />
+                </div>
+                <div className="ml-5 w-0 flex-1">
+                  <dt className="text-sm font-medium text-stone-500 truncate">Total Revenue</dt>
+                  <dd className="flex items-baseline">
+                    <div className="text-2xl font-semibold text-stone-900">KES {totalRevenue.toLocaleString()}</div>
+                  </dd>
+                </div>
+              </div>
             </div>
           </div>
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="px-4 py-5 sm:p-6">
-              <dt className="text-sm font-medium text-stone-500 truncate">Total Revenue</dt>
-              <dd className="mt-1 text-3xl font-semibold text-stone-900">KES {totalRevenue.toLocaleString()}</dd>
+
+          <div className="bg-white overflow-hidden shadow-sm rounded-xl border border-stone-100 hover:shadow-md transition-shadow">
+            <div className="p-6">
+              <div className="flex items-center">
+                <div className="flex-shrink-0 bg-blue-100 rounded-md p-3">
+                  <LayoutDashboard className="h-6 w-6 text-blue-600" />
+                </div>
+                <div className="ml-5 w-0 flex-1">
+                  <dt className="text-sm font-medium text-stone-500 truncate">Total Orders</dt>
+                  <dd className="flex items-baseline">
+                    <div className="text-2xl font-semibold text-stone-900">{totalOrders}</div>
+                  </dd>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white overflow-hidden shadow-sm rounded-xl border border-stone-100 hover:shadow-md transition-shadow">
+            <div className="p-6">
+              <div className="flex items-center">
+                <div className="flex-shrink-0 bg-yellow-100 rounded-md p-3">
+                  <CheckCircle className="h-6 w-6 text-yellow-600" />
+                </div>
+                <div className="ml-5 w-0 flex-1">
+                  <dt className="text-sm font-medium text-stone-500 truncate">Pending Orders</dt>
+                  <dd className="flex items-baseline">
+                    <div className="text-2xl font-semibold text-stone-900">{pendingOrders.length}</div>
+                  </dd>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white overflow-hidden shadow-sm rounded-xl border border-stone-100 hover:shadow-md transition-shadow">
+            <div className="p-6">
+              <div className="flex items-center">
+                <div className="flex-shrink-0 bg-purple-100 rounded-md p-3">
+                  <Users className="h-6 w-6 text-purple-600" />
+                </div>
+                <div className="ml-5 w-0 flex-1">
+                  <dt className="text-sm font-medium text-stone-500 truncate">Total Customers</dt>
+                  <dd className="flex items-baseline">
+                    <div className="text-2xl font-semibold text-stone-900">{uniqueCustomers.length}</div>
+                  </dd>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -607,7 +698,9 @@ const AdminPage = () => {
       {activeTab === 'menu' && (
         <div className="bg-white shadow sm:rounded-lg p-6">
           <div className="flex justify-between items-center mb-6">
-            <h3 className="text-lg leading-6 font-medium text-stone-900">Add New Dish</h3>
+            <h3 className="text-lg leading-6 font-medium text-stone-900">
+              {editingItem ? 'Edit Dish' : 'Add New Dish'}
+            </h3>
             <button
               onClick={handleSeedMenu}
               className="text-sm text-rozina-maroon hover:text-rozina-maroon/80 underline"
@@ -615,7 +708,7 @@ const AdminPage = () => {
               Populate with Sample Data
             </button>
           </div>
-          <form onSubmit={handleAddMenuItem} className="space-y-6 max-w-2xl">
+          <form onSubmit={handleAddOrUpdateMenuItem} className="space-y-6 max-w-2xl">
             <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
               <div className="sm:col-span-4">
                 <label htmlFor="name" className="block text-sm font-medium text-stone-700">
@@ -708,11 +801,20 @@ const AdminPage = () => {
             </div>
 
             <div className="pt-5 border-t border-stone-200">
-              <div className="flex justify-end">
+              <div className="flex justify-end gap-3">
+                {editingItem && (
+                  <button
+                    type="button"
+                    onClick={handleCancelEdit}
+                    className="inline-flex justify-center py-2 px-4 border border-stone-300 shadow-sm text-sm font-medium rounded-md text-stone-700 bg-white hover:bg-stone-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rozina-gold transition-all"
+                  >
+                    Cancel
+                  </button>
+                )}
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-rozina-maroon hover:bg-rozina-maroon/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rozina-gold disabled:opacity-50 transition-all"
+                  className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-rozina-maroon hover:bg-rozina-maroon/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rozina-gold disabled:opacity-50 transition-all"
                 >
                   {isSubmitting ? (
                     <>
@@ -720,7 +822,13 @@ const AdminPage = () => {
                     </>
                   ) : (
                     <>
-                      <Plus className="-ml-1 mr-2 h-5 w-5" /> Add Dish
+                      {editingItem ? (
+                        'Update Dish'
+                      ) : (
+                        <>
+                          <Plus className="-ml-1 mr-2 h-5 w-5" /> Add Dish
+                        </>
+                      )}
                     </>
                   )}
                 </button>
@@ -756,10 +864,18 @@ const AdminPage = () => {
                         </div>
                       </div>
                     </div>
-                    <div className="ml-5 flex-shrink-0">
+                    <div className="ml-5 flex-shrink-0 flex items-center gap-2">
+                      <button
+                        onClick={() => handleEditMenuItem(item)}
+                        className="text-stone-400 hover:text-rozina-gold transition-colors"
+                        title="Edit"
+                      >
+                        <Settings className="h-5 w-5" />
+                      </button>
                       <button
                         onClick={() => handleDeleteMenuItem(item.id)}
                         className="text-stone-400 hover:text-red-600 transition-colors"
+                        title="Delete"
                       >
                         <Trash2 className="h-5 w-5" />
                       </button>

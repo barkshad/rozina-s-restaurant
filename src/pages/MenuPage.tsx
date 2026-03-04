@@ -9,13 +9,12 @@ import { motion, AnimatePresence } from 'motion/react';
 import TiltCard from '@/components/animations/TiltCard';
 import FadeInUp from '@/components/animations/FadeInUp';
 
-const CATEGORIES = ['All', 'Poussin Specials', 'BBQ/Tikka', 'Chinese', 'Italian', 'Seafood'];
-
 const MenuPage = () => {
   const [items, setItems] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
+  const [categories, setCategories] = useState<string[]>(['All']);
 
   useEffect(() => {
     const fetchMenu = async () => {
@@ -23,10 +22,18 @@ const MenuPage = () => {
         const q = query(collection(db, 'menu'), orderBy('name'));
         const querySnapshot = await getDocs(q);
         const menuItems: MenuItem[] = [];
+        const uniqueCategories = new Set<string>(['All']);
+
         querySnapshot.forEach((doc) => {
-          menuItems.push({ id: doc.id, ...doc.data() } as MenuItem);
+          const data = doc.data() as Omit<MenuItem, 'id'>;
+          menuItems.push({ id: doc.id, ...data });
+          if (data.category) {
+            uniqueCategories.add(data.category);
+          }
         });
+        
         setItems(menuItems);
+        setCategories(Array.from(uniqueCategories));
       } catch (error) {
         console.error('Error fetching menu:', error);
       } finally {
@@ -66,7 +73,7 @@ const MenuPage = () => {
         <FadeInUp delay={0.3}>
           <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-white p-4 rounded-xl shadow-sm border border-stone-100 sticky top-24 z-40 backdrop-blur-md bg-opacity-90">
             <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 no-scrollbar">
-              {CATEGORIES.map((cat) => (
+              {categories.map((cat) => (
                 <button
                   key={cat}
                   onClick={() => setSelectedCategory(cat)}

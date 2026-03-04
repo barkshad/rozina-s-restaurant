@@ -13,6 +13,7 @@ const AboutPage = lazy(() => import('@/pages/AboutPage'));
 const CheckoutPage = lazy(() => import('@/pages/CheckoutPage'));
 const AdminPage = lazy(() => import('@/pages/AdminPage'));
 const LoginPage = lazy(() => import('@/pages/LoginPage'));
+const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
 
 export default function App() {
   return (
@@ -27,14 +28,15 @@ export default function App() {
               <Route path="/about" element={<AboutPage />} />
               <Route path="/checkout" element={<CheckoutPage />} />
               <Route path="/login" element={<LoginPage />} />
-              <Route 
-                path="/admin" 
+              <Route
+                path="/admin"
                 element={
                   <ProtectedRoute>
                     <AdminPage />
                   </ProtectedRoute>
-                } 
+                }
               />
+              <Route path="*" element={<NotFoundPage />} />
             </Routes>
           </Suspense>
         </Layout>

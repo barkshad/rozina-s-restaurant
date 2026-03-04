@@ -2,6 +2,7 @@ import React from 'react';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import { Toaster } from 'react-hot-toast';
+import BackToTopButton from './BackToTopButton';
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
@@ -11,6 +12,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         {children}
       </main>
       <Footer />
+      <BackToTopButton />
       <Toaster position="bottom-right" />
     </div>
   );

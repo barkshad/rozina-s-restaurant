@@ -27,7 +27,7 @@ const FadeInUp: React.FC<FadeInUpProps> = ({
     const element = elementRef.current;
     if (!element) return;
 
-    gsap.fromTo(
+    const tween = gsap.fromTo(
       element,
       { 
         opacity: 0, 
@@ -48,7 +48,10 @@ const FadeInUp: React.FC<FadeInUpProps> = ({
     );
 
     return () => {
-      ScrollTrigger.getAll().forEach(t => t.kill());
+      tween.kill();
+      if (tween.scrollTrigger) {
+        tween.scrollTrigger.kill();
+      }
     };
   }, [delay, duration, y]);
 

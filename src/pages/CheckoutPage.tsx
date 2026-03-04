@@ -61,20 +61,45 @@ const CheckoutPage = () => {
     }
   };
 
-  if (cart.length === 0) {
+    if (cart.length === 0) {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center bg-rozina-cream px-4">
-        <div className="bg-white p-8 rounded-full shadow-lg mb-6">
-          <ShoppingBag className="h-12 w-12 text-rozina-maroon/40" />
-        </div>
-        <h2 className="text-4xl font-serif font-medium text-rozina-maroon mb-4">Your Cart is Empty</h2>
-        <p className="text-rozina-charcoal/60 mb-8 font-sans font-light">Looks like you haven't added any delicious items yet.</p>
-        <Link
-          to="/menu"
-          className="inline-flex items-center justify-center px-8 py-3 border border-transparent text-sm font-bold tracking-widest uppercase rounded-none text-white bg-rozina-maroon hover:bg-rozina-maroon/90 shadow-lg transition-all"
+        <motion.div 
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.5, type: "spring" }}
+          className="bg-white p-8 rounded-full shadow-lg mb-6"
         >
-          <ArrowLeft className="mr-2 h-4 w-4" /> Browse Menu
-        </Link>
+          <ShoppingBag className="h-12 w-12 text-rozina-maroon/40" />
+        </motion.div>
+        <motion.h2 
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.2 }}
+          className="text-4xl font-serif font-medium text-rozina-maroon mb-4"
+        >
+          Your Cart is Empty
+        </motion.h2>
+        <motion.p 
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.3 }}
+          className="text-rozina-charcoal/60 mb-8 font-sans font-light"
+        >
+          Looks like you haven't added any delicious items yet.
+        </motion.p>
+        <motion.div
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.4 }}
+        >
+          <Link
+            to="/menu"
+            className="inline-flex items-center justify-center px-8 py-3 border border-transparent text-sm font-bold tracking-widest uppercase rounded-none text-white bg-rozina-maroon hover:bg-rozina-maroon/90 shadow-lg transition-all hover:scale-105 duration-300"
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" /> Browse Menu
+          </Link>
+        </motion.div>
       </div>
     );
   }
@@ -90,9 +115,13 @@ const CheckoutPage = () => {
           {/* Cart Items List */}
           <section className="lg:col-span-7 bg-white p-6 md:p-8 shadow-sm border border-stone-100 mb-8 lg:mb-0">
             <ul className="divide-y divide-stone-100">
-              {cart.map((item) => (
+              {cart.map((item, index) => (
                 <motion.li 
                   layout
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.3, delay: index * 0.1 }}
                   key={item.id} 
                   className="flex py-6 sm:py-8"
                 >

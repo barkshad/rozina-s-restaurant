@@ -201,10 +201,11 @@ const AdminPage = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-      <h1 className="text-3xl font-serif font-bold text-rozina-maroon mb-8">Admin Dashboard</h1>
+    <div className="min-h-screen bg-stone-50 pt-24 pb-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h1 className="text-3xl font-serif font-bold text-rozina-maroon mb-8">Admin Dashboard</h1>
 
-      {/* Tabs */}
+        {/* Tabs */}
       <div className="flex space-x-4 border-b border-stone-200 mb-8 overflow-x-auto">
         <button
           onClick={() => setActiveTab('dashboard')}
@@ -490,6 +491,7 @@ const AdminPage = () => {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 };

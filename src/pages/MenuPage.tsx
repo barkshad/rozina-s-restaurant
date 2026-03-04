@@ -45,15 +45,16 @@ const MenuPage = () => {
   }, [items, selectedCategory, searchQuery]);
 
   return (
-    <div className="space-y-8">
-      <div className="text-center space-y-4">
-        <motion.h1 
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-4xl md:text-5xl font-serif font-bold text-rozina-maroon"
-        >
-          Our Menu
-        </motion.h1>
+    <div className="min-h-screen bg-stone-50 pt-24 pb-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto space-y-8">
+        <div className="text-center space-y-4">
+          <motion.h1 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-4xl md:text-5xl font-serif font-bold text-rozina-maroon"
+          >
+            Our Menu
+          </motion.h1>
         <motion.p 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -133,6 +134,7 @@ const MenuPage = () => {
           </button>
         </motion.div>
       )}
+      </div>
     </div>
   );
 };

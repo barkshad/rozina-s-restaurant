@@ -10,6 +10,8 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = React.useState(false);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
+  const isHome = location.pathname === '/';
+  const shouldShowSolid = scrolled || !isHome;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -32,7 +34,7 @@ const Navbar = () => {
     <nav
       className={clsx(
         'fixed w-full z-50 transition-all duration-500 font-sans',
-        scrolled
+        shouldShowSolid
           ? 'bg-rozina-maroon/95 backdrop-blur-md shadow-lg py-4'
           : 'bg-transparent py-6'
       )}
@@ -43,13 +45,13 @@ const Navbar = () => {
           <Link to="/" className="group flex flex-col items-center">
             <span className={clsx(
               "font-serif text-3xl md:text-4xl font-bold tracking-tight transition-colors duration-300",
-              scrolled ? "text-rozina-gold" : "text-white"
+              shouldShowSolid ? "text-rozina-gold" : "text-white"
             )}>
               Rozina's
             </span>
             <span className={clsx(
               "text-[10px] tracking-[0.3em] uppercase font-light transition-colors duration-300",
-              scrolled ? "text-white/80" : "text-white/80"
+              shouldShowSolid ? "text-white/80" : "text-white/80"
             )}>
               Restaurant
             </span>
@@ -65,7 +67,7 @@ const Navbar = () => {
                   'text-sm uppercase tracking-widest font-medium transition-all duration-300 relative group',
                   isActive(link.path)
                     ? 'text-rozina-gold'
-                    : scrolled ? 'text-white hover:text-rozina-gold' : 'text-white hover:text-rozina-gold'
+                    : shouldShowSolid ? 'text-white hover:text-rozina-gold' : 'text-white hover:text-rozina-gold'
                 )}
               >
                 {link.name}
@@ -79,7 +81,7 @@ const Navbar = () => {
             <Link to="/checkout" className="relative group p-2">
               <ShoppingCart className={clsx(
                 "w-6 h-6 transition-colors duration-300",
-                scrolled ? "text-white group-hover:text-rozina-gold" : "text-white group-hover:text-rozina-gold"
+                shouldShowSolid ? "text-white group-hover:text-rozina-gold" : "text-white group-hover:text-rozina-gold"
               )} />
               <AnimatePresence>
                 {cartCount > 0 && (

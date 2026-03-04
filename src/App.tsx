@@ -1,25 +1,30 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { CartProvider } from '@/context/CartContext';
 import Layout from '@/components/Layout';
-import HomePage from '@/pages/HomePage';
-import MenuPage from '@/pages/MenuPage';
-import AboutPage from '@/pages/AboutPage';
-import CheckoutPage from '@/pages/CheckoutPage';
-import AdminPage from '@/pages/AdminPage';
+import LoadingSpinner from '@/components/LoadingSpinner';
+
+// Lazy load pages for better performance
+const HomePage = lazy(() => import('@/pages/HomePage'));
+const MenuPage = lazy(() => import('@/pages/MenuPage'));
+const AboutPage = lazy(() => import('@/pages/AboutPage'));
+const CheckoutPage = lazy(() => import('@/pages/CheckoutPage'));
+const AdminPage = lazy(() => import('@/pages/AdminPage'));
 
 export default function App() {
   return (
     <CartProvider>
       <Router>
         <Layout>
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/menu" element={<MenuPage />} />
-            <Route path="/about" element={<AboutPage />} />
-            <Route path="/checkout" element={<CheckoutPage />} />
-            <Route path="/admin" element={<AdminPage />} />
-          </Routes>
+          <Suspense fallback={<LoadingSpinner />}>
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/menu" element={<MenuPage />} />
+              <Route path="/about" element={<AboutPage />} />
+              <Route path="/checkout" element={<CheckoutPage />} />
+              <Route path="/admin" element={<AdminPage />} />
+            </Routes>
+          </Suspense>
         </Layout>
       </Router>
     </CartProvider>

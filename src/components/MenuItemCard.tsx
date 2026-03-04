@@ -29,6 +29,9 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({ item }) => {
             alt={item.name}
             className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
             loading="lazy"
+            decoding="async"
+            width="400"
+            height="300"
           />
         ) : (
           <div className="flex items-center justify-center h-full text-stone-400 bg-stone-100">

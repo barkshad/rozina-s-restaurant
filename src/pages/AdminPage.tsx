@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { collection, getDocs, addDoc, updateDoc, doc, query, orderBy, where } from 'firebase/firestore';
+import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy, where } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Order, MenuItem } from '@/types';
 import CloudinaryUploadWidget from '@/components/CloudinaryUploadWidget';
-import { LayoutDashboard, ShoppingBag, Utensils, CheckCircle, Loader2, Plus } from 'lucide-react';
+import { LayoutDashboard, ShoppingBag, Utensils, CheckCircle, Loader2, Plus, Trash2 } from 'lucide-react';
 import { clsx } from 'clsx';
 import toast from 'react-hot-toast';
 
@@ -12,6 +12,7 @@ const CATEGORIES = ['Poussin Specials', 'BBQ/Tikka', 'Chinese', 'Italian', 'Seaf
 const AdminPage = () => {
   const [activeTab, setActiveTab] = useState<'dashboard' | 'orders' | 'menu'>('dashboard');
   const [orders, setOrders] = useState<Order[]>([]);
+  const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
   
   // Menu Form State
@@ -31,13 +32,24 @@ const AdminPage = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const q = query(collection(db, 'orders'), orderBy('timestamp', 'desc'));
-      const querySnapshot = await getDocs(q);
+      // Fetch Orders
+      const ordersQuery = query(collection(db, 'orders'), orderBy('timestamp', 'desc'));
+      const ordersSnapshot = await getDocs(ordersQuery);
       const fetchedOrders: Order[] = [];
-      querySnapshot.forEach((doc) => {
+      ordersSnapshot.forEach((doc) => {
         fetchedOrders.push({ id: doc.id, ...doc.data() } as Order);
       });
       setOrders(fetchedOrders);
+
+      // Fetch Menu Items
+      const menuQuery = query(collection(db, 'menu'), orderBy('name'));
+      const menuSnapshot = await getDocs(menuQuery);
+      const fetchedMenu: MenuItem[] = [];
+      menuSnapshot.forEach((doc) => {
+        fetchedMenu.push({ id: doc.id, ...doc.data() } as MenuItem);
+      });
+      setMenuItems(fetchedMenu);
+
     } catch (error) {
       console.error('Error fetching data:', error);
       toast.error('Failed to load admin data');
@@ -57,6 +69,18 @@ const AdminPage = () => {
     } catch (error) {
       console.error('Error updating order:', error);
       toast.error('Failed to update order');
+    }
+  };
+
+  const handleDeleteMenuItem = async (id: string) => {
+    if (!window.confirm('Are you sure you want to delete this item?')) return;
+    try {
+      await deleteDoc(doc(db, 'menu', id));
+      setMenuItems((prev) => prev.filter((item) => item.id !== id));
+      toast.success('Menu item deleted');
+    } catch (error) {
+      console.error('Error deleting item:', error);
+      toast.error('Failed to delete item');
     }
   };
 
@@ -417,6 +441,53 @@ const AdminPage = () => {
               </div>
             </div>
           </form>
+
+          <div className="mt-10 border-t border-stone-200 pt-10">
+            <h3 className="text-lg leading-6 font-medium text-stone-900 mb-6">Current Menu Items ({menuItems.length})</h3>
+            <div className="bg-white shadow overflow-hidden sm:rounded-md">
+              <ul className="divide-y divide-stone-200">
+                {menuItems.map((item) => (
+                  <li key={item.id} className="px-4 py-4 flex items-center sm:px-6 hover:bg-stone-50">
+                    <div className="min-w-0 flex-1 sm:flex sm:items-center sm:justify-between">
+                      <div className="flex items-center">
+                        <div className="flex-shrink-0 h-12 w-12">
+                          <img
+                            className="h-12 w-12 rounded-md object-cover bg-stone-100"
+                            src={item.imageUrl || 'https://via.placeholder.com/150'}
+                            alt={item.name}
+                          />
+                        </div>
+                        <div className="ml-4 truncate">
+                          <div className="flex text-sm">
+                            <p className="font-medium text-rozina-maroon truncate">{item.name}</p>
+                            <p className="ml-1 flex-shrink-0 font-normal text-stone-500">
+                              in {item.category}
+                            </p>
+                          </div>
+                          <div className="mt-1 flex">
+                            <p className="text-sm text-stone-900 font-bold">KES {item.price}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="ml-5 flex-shrink-0">
+                      <button
+                        onClick={() => handleDeleteMenuItem(item.id)}
+                        className="text-stone-400 hover:text-red-600 transition-colors"
+                      >
+                        <Trash2 className="h-5 w-5" />
+                      </button>
+                    </div>
+                  </li>
+                ))}
+                {menuItems.length === 0 && (
+                  <li className="px-4 py-8 text-center text-stone-500">
+                    No menu items found. Use the "Populate with Sample Data" button above to add some.
+                  </li>
+                )}
+              </ul>
+            </div>
+          </div>
         </div>
       )}
     </div>

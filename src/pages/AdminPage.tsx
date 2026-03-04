@@ -47,9 +47,14 @@ const AdminPage = () => {
         fetchedOrders.push({ id: doc.id, ...doc.data() } as Order);
       });
       setOrders(fetchedOrders);
-    } catch (error) {
-      console.error('Error fetching orders:', error);
-      toast.error('Failed to load orders. Check permissions.');
+    } catch (error: any) {
+      if (error.code === 'unavailable' || error.message?.includes('offline')) {
+        console.warn('Orders fetch skipped (offline mode)');
+        toast('Offline mode: Orders might be outdated', { icon: '⚠️' });
+      } else {
+        console.error('Error fetching orders:', error);
+        toast.error('Failed to load orders. Check permissions.');
+      }
     }
 
     // Fetch Menu Items
@@ -61,9 +66,13 @@ const AdminPage = () => {
         fetchedMenu.push({ id: doc.id, ...doc.data() } as MenuItem);
       });
       setMenuItems(fetchedMenu);
-    } catch (error) {
-      console.error('Error fetching menu:', error);
-      toast.error('Failed to load menu items.');
+    } catch (error: any) {
+      if (error.code === 'unavailable' || error.message?.includes('offline')) {
+        console.warn('Menu fetch skipped (offline mode)');
+      } else {
+        console.error('Error fetching menu:', error);
+        toast.error('Failed to load menu items.');
+      }
     }
 
     // Fetch Settings
@@ -73,9 +82,12 @@ const AdminPage = () => {
       if (settingsSnap.exists()) {
         setHeroVideoUrl(settingsSnap.data().heroVideoUrl || '');
       }
-    } catch (error) {
-      console.error('Error fetching settings:', error);
-      // Settings are optional, so maybe just log it
+    } catch (error: any) {
+      if (error.code === 'unavailable' || error.message?.includes('offline')) {
+        console.warn('Settings fetch skipped (offline mode)');
+      } else {
+        console.error('Error fetching settings:', error);
+      }
     }
 
     setLoading(false);

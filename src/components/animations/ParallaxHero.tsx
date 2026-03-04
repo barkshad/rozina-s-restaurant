@@ -22,8 +22,13 @@ const ParallaxHero = () => {
         if (settingsSnap.exists() && settingsSnap.data().heroVideoUrl) {
           setHeroVideoUrl(settingsSnap.data().heroVideoUrl);
         }
-      } catch (error) {
-        console.error("Error fetching hero settings:", error);
+      } catch (error: any) {
+        // Suppress offline errors as they are expected in some environments
+        if (error.code === 'unavailable' || error.message?.includes('offline')) {
+          console.warn("Hero settings fetch skipped (offline mode)");
+        } else {
+          console.error("Error fetching hero settings:", error);
+        }
       }
     };
     fetchSettings();

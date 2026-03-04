@@ -15,6 +15,9 @@ export interface Order {
   id: string;
   items: CartItem[];
   total: number;
-  status: 'Pending' | 'Paid' | 'Completed';
+  status: 'Pending' | 'Paid' | 'Completed' | 'Cancelled';
   timestamp: any; // Firestore Timestamp
+  customerName: string;
+  customerPhone: string;
+  customerEmail?: string;
 }

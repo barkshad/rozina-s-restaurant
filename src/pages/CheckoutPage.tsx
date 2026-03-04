@@ -10,10 +10,27 @@ import { motion } from 'motion/react';
 const CheckoutPage = () => {
   const { cart, removeFromCart, updateQuantity, cartTotal, clearCart } = useCart();
   const [loading, setLoading] = useState(false);
+  const [customerDetails, setCustomerDetails] = useState({
+    name: '',
+    phone: '',
+    email: '',
+  });
 
-  const handlePayment = async () => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setCustomerDetails((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handlePayment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
     if (cart.length === 0) {
       toast.error('Your cart is empty');
+      return;
+    }
+
+    if (!customerDetails.name || !customerDetails.phone) {
+      toast.error('Please fill in your name and phone number');
       return;
     }
 
@@ -25,6 +42,9 @@ const CheckoutPage = () => {
         total: cartTotal,
         status: 'Pending',
         timestamp: serverTimestamp(),
+        customerName: customerDetails.name,
+        customerPhone: customerDetails.phone,
+        customerEmail: customerDetails.email || '',
       };
 
       await addDoc(collection(db, 'orders'), orderData);
@@ -155,20 +175,61 @@ const CheckoutPage = () => {
               </dl>
 
               <div className="mt-8">
-                <button
-                  type="button"
-                  onClick={handlePayment}
-                  disabled={loading}
-                  className="w-full bg-rozina-gold text-rozina-maroon font-bold uppercase tracking-widest py-4 hover:bg-white hover:text-rozina-maroon border border-transparent hover:border-rozina-gold transition-all duration-300 shadow-md flex items-center justify-center gap-2"
-                >
-                  {loading ? (
-                    'Processing...'
-                  ) : (
-                    <>
-                      Pay via M-Pesa <CreditCard className="h-5 w-5" />
-                    </>
-                  )}
-                </button>
+                <form onSubmit={handlePayment} className="space-y-4 mb-6">
+                  <div>
+                    <label htmlFor="name" className="block text-sm font-medium text-stone-700 mb-1">Full Name *</label>
+                    <input
+                      type="text"
+                      id="name"
+                      name="name"
+                      required
+                      value={customerDetails.name}
+                      onChange={handleInputChange}
+                      className="w-full border-stone-300 rounded-md shadow-sm focus:ring-rozina-gold focus:border-rozina-gold sm:text-sm p-2 border"
+                      placeholder="John Doe"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="phone" className="block text-sm font-medium text-stone-700 mb-1">Phone Number *</label>
+                    <input
+                      type="tel"
+                      id="phone"
+                      name="phone"
+                      required
+                      value={customerDetails.phone}
+                      onChange={handleInputChange}
+                      className="w-full border-stone-300 rounded-md shadow-sm focus:ring-rozina-gold focus:border-rozina-gold sm:text-sm p-2 border"
+                      placeholder="0712 345 678"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="email" className="block text-sm font-medium text-stone-700 mb-1">Email (Optional)</label>
+                    <input
+                      type="email"
+                      id="email"
+                      name="email"
+                      value={customerDetails.email}
+                      onChange={handleInputChange}
+                      className="w-full border-stone-300 rounded-md shadow-sm focus:ring-rozina-gold focus:border-rozina-gold sm:text-sm p-2 border"
+                      placeholder="john@example.com"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full bg-rozina-gold text-rozina-maroon font-bold uppercase tracking-widest py-4 hover:bg-white hover:text-rozina-maroon border border-transparent hover:border-rozina-gold transition-all duration-300 shadow-md flex items-center justify-center gap-2 mt-6"
+                  >
+                    {loading ? (
+                      'Processing...'
+                    ) : (
+                      <>
+                        Pay via M-Pesa <CreditCard className="h-5 w-5" />
+                      </>
+                    )}
+                  </button>
+                </form>
+                
                 <p className="mt-4 text-[10px] text-center text-stone-400 uppercase tracking-wide">
                   Secure payment processing via Lipana
                 </p>

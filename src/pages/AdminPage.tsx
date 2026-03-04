@@ -3,14 +3,16 @@ import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy,
 import { db } from '@/lib/firebase';
 import { Order, MenuItem } from '@/types';
 import CloudinaryUploadWidget from '@/components/CloudinaryUploadWidget';
-import { LayoutDashboard, ShoppingBag, Utensils, CheckCircle, Loader2, Plus, Trash2 } from 'lucide-react';
+import { LayoutDashboard, ShoppingBag, Utensils, CheckCircle, Loader2, Plus, Trash2, Users, Download } from 'lucide-react';
 import { clsx } from 'clsx';
 import toast from 'react-hot-toast';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 const CATEGORIES = ['Poussin Specials', 'BBQ/Tikka', 'Chinese', 'Italian', 'Seafood'];
 
 const AdminPage = () => {
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'orders' | 'menu'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'orders' | 'menu' | 'customers'>('dashboard');
   const [orders, setOrders] = useState<Order[]>([]);
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -108,6 +110,64 @@ const AdminPage = () => {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  // Customer Data Extraction
+  const uniqueCustomers = React.useMemo(() => {
+    const customerMap = new Map();
+    orders.forEach((order) => {
+      if (order.customerPhone) {
+        if (!customerMap.has(order.customerPhone)) {
+          customerMap.set(order.customerPhone, {
+            name: order.customerName,
+            phone: order.customerPhone,
+            email: order.customerEmail || 'N/A',
+            lastOrderDate: order.timestamp?.toDate ? order.timestamp.toDate() : new Date(),
+            totalOrders: 1,
+            totalSpent: order.total
+          });
+        } else {
+          const customer = customerMap.get(order.customerPhone);
+          customer.totalOrders += 1;
+          customer.totalSpent += order.total;
+          const orderDate = order.timestamp?.toDate ? order.timestamp.toDate() : new Date();
+          if (orderDate > customer.lastOrderDate) {
+            customer.lastOrderDate = orderDate;
+          }
+        }
+      }
+    });
+    return Array.from(customerMap.values());
+  }, [orders]);
+
+  const handleDownloadCustomersPDF = () => {
+    const doc = new jsPDF();
+
+    doc.setFontSize(18);
+    doc.text("Rozina's Restaurant - Customer Database", 14, 22);
+    doc.setFontSize(11);
+    doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 14, 30);
+
+    const tableColumn = ["Name", "Phone", "Email", "Total Orders", "Total Spent (KES)", "Last Active"];
+    const tableRows = uniqueCustomers.map(customer => [
+      customer.name,
+      customer.phone,
+      customer.email,
+      customer.totalOrders,
+      customer.totalSpent.toLocaleString(),
+      customer.lastOrderDate.toLocaleDateString()
+    ]);
+
+    autoTable(doc, {
+      head: [tableColumn],
+      body: tableRows,
+      startY: 40,
+      theme: 'grid',
+      styles: { fontSize: 10, cellPadding: 3 },
+      headStyles: { fillColor: [128, 0, 0], textColor: [255, 255, 255] }, // Rozina Maroon
+    });
+
+    doc.save("rozinas_customers.pdf");
   };
 
   // Seed Data
@@ -243,6 +303,18 @@ const AdminPage = () => {
           <Utensils className="inline-block w-4 h-4 mr-2" />
           Menu Management
         </button>
+        <button
+          onClick={() => setActiveTab('customers')}
+          className={clsx(
+            'pb-4 px-4 text-sm font-medium transition-colors whitespace-nowrap',
+            activeTab === 'customers'
+              ? 'border-b-2 border-rozina-maroon text-rozina-maroon'
+              : 'text-stone-500 hover:text-stone-700'
+          )}
+        >
+          <Users className="inline-block w-4 h-4 mr-2" />
+          Customers
+        </button>
       </div>
 
       {/* Dashboard Content */}
@@ -315,6 +387,83 @@ const AdminPage = () => {
               <li className="px-4 py-8 text-center text-stone-500">No orders found.</li>
             )}
           </ul>
+        </div>
+      )}
+
+      {/* Customers Content */}
+      {activeTab === 'customers' && (
+        <div className="bg-white shadow sm:rounded-lg overflow-hidden">
+          <div className="px-4 py-5 sm:px-6 flex justify-between items-center bg-stone-50 border-b border-stone-200">
+            <div>
+              <h3 className="text-lg leading-6 font-medium text-stone-900">Customer Database</h3>
+              <p className="mt-1 max-w-2xl text-sm text-stone-500">
+                Contact details collected from orders.
+              </p>
+            </div>
+            <button
+              onClick={handleDownloadCustomersPDF}
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-rozina-maroon hover:bg-rozina-maroon/90 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rozina-gold transition-all"
+            >
+              <Download className="mr-2 h-4 w-4" /> Download PDF
+            </button>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-stone-200">
+              <thead className="bg-stone-50">
+                <tr>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">
+                    Customer Name
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">
+                    Phone Number
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">
+                    Email
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">
+                    Total Orders
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">
+                    Total Spent
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">
+                    Last Active
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-stone-200">
+                {uniqueCustomers.map((customer, index) => (
+                  <tr key={index} className="hover:bg-stone-50 transition-colors">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium text-stone-900">{customer.name || 'Unknown'}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-stone-500">{customer.phone}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-stone-500">{customer.email}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-stone-900">{customer.totalOrders}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-stone-900 font-medium">KES {customer.totalSpent.toLocaleString()}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-stone-500">{customer.lastOrderDate.toLocaleDateString()}</div>
+                    </td>
+                  </tr>
+                ))}
+                {uniqueCustomers.length === 0 && (
+                  <tr>
+                    <td colSpan={6} className="px-6 py-10 text-center text-stone-500">
+                      No customer data found yet.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 

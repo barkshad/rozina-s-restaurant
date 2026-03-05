@@ -50,6 +50,10 @@ const CloudinaryUploadWidget: React.FC<CloudinaryUploadWidgetProps> = ({
       widgetRef.current.open();
     } else {
       console.error('Cloudinary widget not loaded');
+      // Fallback or user notification
+      if (!(window as any).cloudinary) {
+        alert('Upload widget failed to load. Please check your internet connection or ad blocker.');
+      }
     }
   };
 

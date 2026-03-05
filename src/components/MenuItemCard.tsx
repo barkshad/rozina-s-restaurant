@@ -40,6 +40,10 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({ item }) => {
             decoding="async"
             width="400"
             height="300"
+            onError={(e) => {
+              e.currentTarget.src = 'https://via.placeholder.com/400x300?text=No+Image';
+              e.currentTarget.onerror = null; // Prevent infinite loop
+            }}
           />
         ) : (
           <div className="flex items-center justify-center h-full text-stone-400 bg-stone-100 font-serif italic">

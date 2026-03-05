@@ -69,7 +69,10 @@ const AdminPage = () => {
       const ordersSnapshot = await getDocs(ordersQuery);
       const fetchedOrders: Order[] = [];
       ordersSnapshot.forEach((doc) => {
-        fetchedOrders.push({ id: doc.id, ...doc.data() } as Order);
+        const data = doc.data();
+        if (data && Array.isArray(data.items)) {
+           fetchedOrders.push({ id: doc.id, ...data } as Order);
+        }
       });
       setOrders(fetchedOrders);
     } catch (error: any) {
@@ -237,33 +240,38 @@ const AdminPage = () => {
   }, [orders]);
 
   const handleDownloadCustomersPDF = () => {
-    const doc = new jsPDF();
+    try {
+      const doc = new jsPDF();
 
-    doc.setFontSize(18);
-    doc.text("Rozina's Restaurant - Customer Database", 14, 22);
-    doc.setFontSize(11);
-    doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 14, 30);
+      doc.setFontSize(18);
+      doc.text("Rozina's Restaurant - Customer Database", 14, 22);
+      doc.setFontSize(11);
+      doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 14, 30);
 
-    const tableColumn = ["Name", "Phone", "Email", "Total Orders", "Total Spent (KES)", "Last Active"];
-    const tableRows = uniqueCustomers.map(customer => [
-      customer.name,
-      customer.phone,
-      customer.email,
-      customer.totalOrders,
-      customer.totalSpent.toLocaleString(),
-      customer.lastOrderDate.toLocaleDateString()
-    ]);
+      const tableColumn = ["Name", "Phone", "Email", "Total Orders", "Total Spent (KES)", "Last Active"];
+      const tableRows = uniqueCustomers.map(customer => [
+        customer.name,
+        customer.phone,
+        customer.email,
+        customer.totalOrders,
+        customer.totalSpent.toLocaleString(),
+        customer.lastOrderDate.toLocaleDateString()
+      ]);
 
-    autoTable(doc, {
-      head: [tableColumn],
-      body: tableRows,
-      startY: 40,
-      theme: 'grid',
-      styles: { fontSize: 10, cellPadding: 3 },
-      headStyles: { fillColor: [128, 0, 0], textColor: [255, 255, 255] }, // Rozina Maroon
-    });
+      autoTable(doc, {
+        head: [tableColumn],
+        body: tableRows,
+        startY: 40,
+        theme: 'grid',
+        styles: { fontSize: 10, cellPadding: 3 },
+        headStyles: { fillColor: [128, 0, 0], textColor: [255, 255, 255] }, // Rozina Maroon
+      });
 
-    doc.save("rozinas_customers.pdf");
+      doc.save("rozinas_customers.pdf");
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      toast.error('Failed to generate PDF');
+    }
   };
 
   // Seed Data

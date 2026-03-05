@@ -25,10 +25,14 @@ const MenuPage = () => {
         const uniqueCategories = new Set<string>(['All']);
 
         querySnapshot.forEach((doc) => {
-          const data = doc.data() as Omit<MenuItem, 'id'>;
-          menuItems.push({ id: doc.id, ...data });
-          if (data.category) {
-            uniqueCategories.add(data.category);
+          const data = doc.data();
+          // Basic validation to ensure data is not malformed
+          if (data && typeof data === 'object' && 'name' in data && 'price' in data) {
+             const menuItem = { id: doc.id, ...data } as MenuItem;
+             menuItems.push(menuItem);
+             if (typeof menuItem.category === 'string') {
+               uniqueCategories.add(menuItem.category);
+             }
           }
         });
         
